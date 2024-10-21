@@ -1,0 +1,108 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <ProjectGuid>{8445E75B-1E0D-418E-B50B-3D8EE448BD3B}</ProjectGuid>
+    <OutputPath>..\Bin\netstandard\</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <RootNamespace>BPMSoft_NgExample</RootNamespace>
+    <BaseIntermediateOutputPath>..\..\obj\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='net472|AnyCPU'">
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|net472|AnyCPU'">
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Label="TemplateBuilder">
+    <TemplateBuilderTargets Condition=" '$(TemplateBuilderTargets)'=='' ">$([System.IO.Path]::GetFullPath( $(MSBuildProjectDirectory)\..\packages\TemplateBuilder.1.1.6.1\tools\ligershark.templates.targets ))</TemplateBuilderTargets>
+  </PropertyGroup>
+  <ItemGroup Label="Package References">
+    <PackageReference Include="BPMSoftSDK" Version="1.5.0.902" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" PrivateAssets="All" Version="1.0.3" />
+  </ItemGroup>
+  <!-- ##BpmonlineSDKMarker## -->
+  <!-- ##BpmonlineSDKMarker## -->
+  <ItemGroup>
+    <None Remove="creatio\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Assemblies\**" />
+    <Compile Remove="Data\**" />
+    <Compile Remove="Files\**" />
+    <Compile Remove="obj\**" />
+    <Compile Remove="packages\**" />
+    <Compile Remove="Resources\**" />
+    <Compile Remove="Schemas\**" />
+    <Compile Remove="SqlScripts\**" />
+    <EmbeddedResource Remove="Assemblies\**" />
+    <EmbeddedResource Remove="Data\**" />
+    <EmbeddedResource Remove="Files\**" />
+    <EmbeddedResource Remove="obj\**" />
+    <EmbeddedResource Remove="packages\**" />
+    <EmbeddedResource Remove="Resources\**" />
+    <EmbeddedResource Remove="Schemas\**" />
+    <EmbeddedResource Remove="SqlScripts\**" />
+    <None Remove="Assemblies\**" />
+    <None Remove="Data\**" />
+    <None Remove="Files\**" />
+    <None Remove="obj\**" />
+    <None Remove="packages\**" />
+    <None Remove="Resources\**" />
+    <None Remove="Schemas\**" />
+    <None Remove="SqlScripts\**" />
+    <Compile Remove="creatio\**" />
+    <EmbeddedResource Remove="creatio\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove=".gitattributes" />
+    <None Remove=".gitignore" />
+    <None Remove=".gitlab-ci.yml" />
+    <None Remove="app.config" />
+    <None Remove="build.bat" />
+    <None Remove="build.config" />
+    <None Remove="descriptor.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Common.Logging">
+      <Version>3.4.1</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies.net472" Version="1.0.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.1</Version>
+    </PackageReference>
+    <PackageReference Include="System.CodeDom">
+      <Version>5.0.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+    <PackageReference Include="System.Collections.Specialized">
+      <Version>4.3.0</Version>
+    </PackageReference>
+    <PackageReference Include="System.Net.Http">
+      <Version>4.3.4</Version>
+    </PackageReference>
+    <PackageReference Include="System.Runtime.Serialization.Primitives">
+      <Version>4.3.0</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="'$(TargetFramework)'=='netstandard2.0'" />
+    <When Condition="'$(TargetFramework)'=='net472'">
+      <ItemGroup>
+        <Reference Include="System.ServiceModel" />
+        <Reference Include="System.ServiceModel.Activation" />
+        <Reference Include="System.ServiceModel.Web" />
+        <Reference Include="System.Web" />
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+	<Exec Condition="$(ConfigurationName) == Debug" Command="clio restart -e example" />
+  </Target>
+  <!--Move to Package reference, when ATF.Repository will be built against netstandard-->
+</Project>

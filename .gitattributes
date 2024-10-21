@@ -1,0 +1,8 @@
+# Set the default behavior for all files.
+* text=auto
+
+# Convert to CRLF line endings on checkout.
+*.xml text eol=crlf
+
+# Binary files.
+*.dll binary

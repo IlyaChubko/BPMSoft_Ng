@@ -1,0 +1,21 @@
+﻿{
+  "Descriptor": {
+    "UId": "88293bcb-b492-d863-b424-e793a6d27791",
+    "Name": "BPMSoft_NgExample",
+    "BPMSoftVersion": "1.5.0",
+    "ModifiedOnUtc": "\/Date(1729425122000)\/",
+    "Maintainer": "Customer",
+    "DependsOn": [
+      {
+        "UId": "613fd913-be03-46ce-909b-f44e4225469e",
+        "PackageVersion": "1.0.0",
+        "Name": "UIv2"
+      },
+      {
+        "UId": "9310225d-1ff8-45f2-9f34-9faf094d635a",
+        "PackageVersion": "1.0.0",
+        "Name": "Timeline"
+      }
+    ]
+  }
+}
