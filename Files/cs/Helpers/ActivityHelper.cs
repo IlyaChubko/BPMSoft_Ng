@@ -1,8 +1,16 @@
-﻿using BPMSoft.Core;
+﻿using BPMSoft.Common;
+using BPMSoft.Core;
+using BPMSoft.Core.DB;
+using BPMSoft.Core.Entities;
+using BPMSoft_NgExample.Base;
 using BPMSoft_NgExample.Models;
 using Common.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Runtime.InteropServices.ComTypes;
+using System.Xml.Linq;
+using static BPMSoft_NgExample.Base.ConstCs;
 
 namespace BPMSoft_NgExample.Helpers
 {
@@ -29,91 +37,116 @@ namespace BPMSoft_NgExample.Helpers
 
 		#region Methods: Public
 
-		public void AddActivity(string title)
+		public void AddActivity(Guid ownerId, string title)
 		{
-			throw new System.NotImplementedException();
-		}
+            Insert insert = (Insert)new Insert(_userConnection)
+                .Into("Activity")
+                .Set("StatusId", Column.Parameter(ConstCs.Activity.Status.NotStarted))
+                .Set("AuthorId", Column.Parameter(_userConnection.CurrentUser.ContactId))
+                .Set("PriorityId", Column.Parameter(ConstCs.Activity.Priority.Medium))
+                .Set("ActivityCategoryId", Column.Parameter(ConstCs.Activity.Category.Todo))
+                .Set("Title", Column.Parameter(title))
+                .Set("OwnerId", Column.Parameter(ownerId));
+            insert.Execute();
+        }
 
         public List<ActivityBaseData> GetActivities(Guid ownerId)
         {
-            return new List<ActivityBaseData>() {
-                new ActivityBaseData {
-                    Id = new Guid("76a544ff-25e4-4b70-a470-e49aeddd0611"),
-                    Title = "Отправить письмо на согласование 1",
-                    StartDate = DateTime.Now.ToString("yyyy-MM-dd"),
-                    StatusId =  new Guid("201cfba8-58e6-df11-971b-001d60e938c6")
-                },
-                new ActivityBaseData {
-                    Id = new Guid("76a544ff-25e4-4b70-a470-e49aeddd0612"),
-                    Title = "Отправить письмо на согласование 2",
-                    StartDate = DateTime.Now.ToString("yyyy-MM-dd"),
-                    StatusId =  new Guid("384d4b84-58e6-df11-971b-001d60e938c6")
-                },
-                new ActivityBaseData {
-                    Id = new Guid("76a544ff-25e4-4b70-a470-e49aeddd0613"),
-                    Title = "Отправить письмо на согласование 3",
-                    StartDate = DateTime.Now.ToString("yyyy-MM-dd"),
-                    StatusId =  new Guid("394d4b84-58e6-df11-971b-001d60e938c6")
-                },
-                new ActivityBaseData {
-                    Id = new Guid("76a544ff-25e4-4b70-a470-e49aeddd0614"),
-                    Title = "Отправить письмо на согласование 4",
-                    StartDate = DateTime.Now.ToString("yyyy-MM-dd"),
-                    StatusId =  new Guid("4bdbb88f-58e6-df11-971b-001d60e938c6")
-                },
-            };
+            List<ActivityBaseData> activityList = new List<ActivityBaseData> { };
+            Select select = new Select(_userConnection)
+                .Column("Id")
+                .Column("Title")
+                .Column("StartDate")
+                .Column("StatusId")
+                .From("Activity")
+                .Where("OwnerId").IsEqual(Column.Parameter(ownerId)) as Select;
+            using (DBExecutor dbExecutor = _userConnection.EnsureDBConnection())
+            {
+                using (IDataReader dataReader = select.ExecuteReader(dbExecutor))
+                {
+                    while (dataReader.Read())
+                    {
+                        activityList.Add(new ActivityBaseData
+                        {
+                            Id = dataReader.GetColumnValue<Guid>("Id"),
+                            Title = dataReader.GetColumnValue<string>("Title"),
+                            StartDate = dataReader.GetColumnValue<DateTime>("StartDate").ToString("dd.MM.yyyy"),
+                            StatusId = dataReader.GetColumnValue<Guid>("StatusId"),
+                        });
+                    }
+                }
+            }
+            return activityList;
         }
 
         public ActivityFullData GetActivity(Guid activityId)
         {
-            string title = "Отправить письмо на согласование";
-            DateTime startDate = DateTime.Now;
-            DateTime endDate = DateTime.Now;
-            string owner = "Иванов Иван Иванович";
-            string category = "Выполнить";
-
-            ActivityFullData response = new ActivityFullData
+            ActivityFullData activity = new ActivityFullData {};
+            Select select = new Select(_userConnection)
+                .Column("Activity", "Title")
+                .Column("Activity", "StartDate")
+                .Column("Activity", "DueDate")
+                .Column("Activity", "StatusId")
+                .Column("Author", "Name").As("AuthorName")
+                .Column("ActivityCategory", "Name").As("CategoryName")
+                .From("Activity")
+                .InnerJoin("Contact").As("Author").On("Activity", "AuthorId").IsEqual("Author", "Id")
+                .InnerJoin("ActivityCategory").As("ActivityCategory").On("Activity", "ActivityCategoryId").IsEqual("ActivityCategory", "Id")
+                .Where("Activity", "Id").IsEqual(Column.Parameter(activityId)) as Select;
+            using (DBExecutor dbExecutor = _userConnection.EnsureDBConnection())
             {
-                Id = activityId,
-                Title = title,
-                StartDate = startDate.ToString("yyyy-MM-dd"),
-                EndDate = endDate.ToString("yyyy-MM-dd"),
-                StatusId = new Guid("394d4b84-58e6-df11-971b-001d60e938c6"),
-                Owner = owner,
-                Category = category
-            };
-            return response;
+                using (IDataReader dataReader = select.ExecuteReader(dbExecutor))
+                {
+                    if (dataReader.Read())
+                    {
+                        activity = new ActivityFullData
+                        {
+                            Id = activityId,
+                            Title = dataReader.GetColumnValue<string>("Title"),
+                            StartDate = dataReader.GetColumnValue<DateTime>("StartDate").ToString("dd.MM.yyyy"),
+                            EndDate = dataReader.GetColumnValue<DateTime>("DueDate").ToString("dd.MM.yyyy"),
+                            StatusId = dataReader.GetColumnValue<Guid>("StatusId"),
+                            Author = dataReader.GetColumnValue<string>("AuthorName"),
+                            Category = dataReader.GetColumnValue<string>("CategoryName")
+                        };
+                    }
+                }
+            }
+            return activity;
         }
 
         public void DeleteActivity(Guid activityId)
         {
-            throw new System.NotImplementedException();
+            var esq = new EntitySchemaQuery(_userConnection.EntitySchemaManager, "Activity");
+            esq.AddAllSchemaColumns();
+            var entity = esq.GetEntity(_userConnection, activityId);
+            entity.Delete();
         }
 
         public List<StatusData> GetStatuses()
         {
-            return new List<StatusData>() {
-                new StatusData {
-                    Id = new Guid("201cfba8-58e6-df11-971b-001d60e938c6"),
-                    Name = "Отменена",
-                    IsFinal = true,
-                },
-                new StatusData {
-                    Id = new Guid("384d4b84-58e6-df11-971b-001d60e938c6"),
-                    Name = "Не начата",
-                    IsFinal = false,
-                },
-                new StatusData {
-                    Id = new Guid("394d4b84-58e6-df11-971b-001d60e938c6"),
-                    Name = "В работе",
-                    IsFinal = false,
-                },
-                new StatusData {
-                    Id = new Guid("4bdbb88f-58e6-df11-971b-001d60e938c6"),
-                    Name = "Завершена",
-                    IsFinal = true
+            List<StatusData> list = new List<StatusData>();
+            Select select = new Select(_userConnection)
+                .Column("Id")
+                .Column("Name")
+                .Column("Finish")
+                .From("ActivityStatus") as Select;
+            using (DBExecutor dbExecutor = _userConnection.EnsureDBConnection())
+            {
+                using (IDataReader dataReader = select.ExecuteReader(dbExecutor))
+                {
+                    while (dataReader.Read())
+                    {
+                        list.Add(new StatusData
+                        {
+                            Id = dataReader.GetColumnValue<Guid>("Id"),
+                            Name = dataReader.GetColumnValue<string>("Name"),
+                            IsFinal = dataReader.GetColumnValue<bool>("Finish"),
+                        });
+                    }
                 }
-            };
+            }
+            return list;
         }
 
         #endregion
