@@ -25,8 +25,8 @@ namespace BPMSoft_NgExample.Models
         [DataMember(Name = "endDate")]
         public string EndDate { get; set; }
 
-        [DataMember(Name = "owner")]
-        public string Owner { get; set; }
+        [DataMember(Name = "author")]
+        public string Author { get; set; }
 
         [DataMember(Name = "category")]
         public string Category { get; set; }
