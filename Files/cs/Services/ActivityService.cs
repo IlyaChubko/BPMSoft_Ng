@@ -15,42 +15,42 @@ namespace BPMSoft_NgExample.Services
     {
         [OperationContract]
         [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.WrappedRequest, ResponseFormat = WebMessageFormat.Json)]
-        public void AddActivity(Guid ownerId, string title)
+        public void AddRecord(Guid ownerId, string title)
         {
             ActivityHelper helper = new ActivityHelper(UserConnection);
-            helper.AddActivity(ownerId, title);
+            helper.AddRecord(ownerId, title);
         }
 
         [OperationContract]
         [WebInvoke(Method = "GET", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.Bare, ResponseFormat = WebMessageFormat.Json)]
-        public List<ActivityBaseData> GetActivities(Guid ownerId)
+        public List<ActivityBaseData> GetRecords(Guid ownerId)
         {
             ActivityHelper helper = new ActivityHelper(UserConnection);
-            return helper.GetActivities(ownerId);
+            return helper.GetRecords(ownerId);
         }
 
         [OperationContract]
         [WebInvoke(Method = "GET", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.Bare, ResponseFormat = WebMessageFormat.Json)]
-        public ActivityFullData GetActivity(Guid activityId)
+        public ActivityFullData GetRecord(Guid activityId)
         {
             ActivityHelper helper = new ActivityHelper(UserConnection);
-            return helper.GetActivity(activityId);
+            return helper.GetRecord(activityId);
         }
 
         [OperationContract]
         [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.WrappedRequest, ResponseFormat = WebMessageFormat.Json)]
-        public void DeleteActivity(Guid activityId)
+        public void DeleteRecord(Guid activityId)
         {
             ActivityHelper helper = new ActivityHelper(UserConnection);
-            helper.DeleteActivity(activityId);
+            helper.DeleteRecord(activityId);
         }
 
         [OperationContract]
         [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.WrappedRequest, ResponseFormat = WebMessageFormat.Json)]
-        public void SetActivityStatusFinished(Guid activityId)
+        public void CheckRecord(Guid activityId)
         {
             ActivityHelper helper = new ActivityHelper(UserConnection);
-            helper.SetActivityStatusFinished(activityId);
+            helper.CheckRecord(activityId);
         }
 
         [OperationContract]
