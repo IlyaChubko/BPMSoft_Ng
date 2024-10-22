@@ -11,6 +11,7 @@ using System.Data;
 using System.Runtime.InteropServices.ComTypes;
 using System.Xml.Linq;
 using static BPMSoft_NgExample.Base.ConstCs;
+using static BPMSoft_NgExample.Base.ConstCs.Activity;
 
 namespace BPMSoft_NgExample.Helpers
 {
@@ -121,6 +122,14 @@ namespace BPMSoft_NgExample.Helpers
             esq.AddAllSchemaColumns();
             var entity = esq.GetEntity(_userConnection, activityId);
             entity.Delete();
+        }
+
+        public void SetActivityStatusFinished(Guid activityId)
+        {
+            Update update = new Update(_userConnection, "Activity")
+                .Set("StatusId", Column.Parameter(ConstCs.Activity.Status.Finished))
+                .Where("Id").IsEqual(Column.Parameter(activityId)) as Update;
+            update.Execute();
         }
 
         public List<StatusData> GetStatuses()

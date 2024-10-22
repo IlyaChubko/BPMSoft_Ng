@@ -46,6 +46,14 @@ namespace BPMSoft_NgExample.Services
         }
 
         [OperationContract]
+        [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.WrappedRequest, ResponseFormat = WebMessageFormat.Json)]
+        public void SetActivityStatusFinished(Guid activityId)
+        {
+            ActivityHelper helper = new ActivityHelper(UserConnection);
+            helper.SetActivityStatusFinished(activityId);
+        }
+
+        [OperationContract]
         [WebInvoke(Method = "GET", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.WrappedRequest, ResponseFormat = WebMessageFormat.Json)]
         public List<StatusData> GetStatuses()
         {
