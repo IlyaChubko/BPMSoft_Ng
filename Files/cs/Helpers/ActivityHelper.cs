@@ -38,7 +38,7 @@ namespace BPMSoft_NgExample.Helpers
 
 		#region Methods: Public
 
-		public void AddRecord(Guid ownerId, string title)
+		public void AddRecord(Guid contactId, ActivityBaseData data)
 		{
             Insert insert = (Insert)new Insert(_userConnection)
                 .Into("Activity")
@@ -46,8 +46,8 @@ namespace BPMSoft_NgExample.Helpers
                 .Set("AuthorId", Column.Parameter(_userConnection.CurrentUser.ContactId))
                 .Set("PriorityId", Column.Parameter(ConstCs.Activity.Priority.Medium))
                 .Set("ActivityCategoryId", Column.Parameter(ConstCs.Activity.Category.Todo))
-                .Set("Title", Column.Parameter(title))
-                .Set("OwnerId", Column.Parameter(ownerId));
+                .Set("Title", Column.Parameter(data.Title))
+                .Set("OwnerId", Column.Parameter(contactId));
             insert.Execute();
         }
 

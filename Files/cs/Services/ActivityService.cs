@@ -15,10 +15,10 @@ namespace BPMSoft_NgExample.Services
     {
         [OperationContract]
         [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.WrappedRequest, ResponseFormat = WebMessageFormat.Json)]
-        public void AddRecord(Guid ownerId, string title)
+        public void AddRecord(Guid contactId, ActivityBaseData data)
         {
             ActivityHelper helper = new ActivityHelper(UserConnection);
-            helper.AddRecord(ownerId, title);
+            helper.AddRecord(contactId, data);
         }
 
         [OperationContract]
