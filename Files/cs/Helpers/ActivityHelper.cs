@@ -38,7 +38,7 @@ namespace BPMSoft_NgExample.Helpers
 
 		#region Methods: Public
 
-		public void AddActivity(Guid ownerId, string title)
+		public void AddRecord(Guid ownerId, string title)
 		{
             Insert insert = (Insert)new Insert(_userConnection)
                 .Into("Activity")
@@ -51,7 +51,7 @@ namespace BPMSoft_NgExample.Helpers
             insert.Execute();
         }
 
-        public List<ActivityBaseData> GetActivities(Guid ownerId)
+        public List<ActivityBaseData> GetRecords(Guid ownerId)
         {
             List<ActivityBaseData> activityList = new List<ActivityBaseData> { };
             Select select = new Select(_userConnection)
@@ -80,7 +80,7 @@ namespace BPMSoft_NgExample.Helpers
             return activityList;
         }
 
-        public ActivityFullData GetActivity(Guid activityId)
+        public ActivityFullData GetRecord(Guid activityId)
         {
             ActivityFullData activity = new ActivityFullData {};
             Select select = new Select(_userConnection)
@@ -116,7 +116,7 @@ namespace BPMSoft_NgExample.Helpers
             return activity;
         }
 
-        public void DeleteActivity(Guid activityId)
+        public void DeleteRecord(Guid activityId)
         {
             var esq = new EntitySchemaQuery(_userConnection.EntitySchemaManager, "Activity");
             esq.AddAllSchemaColumns();
@@ -124,7 +124,7 @@ namespace BPMSoft_NgExample.Helpers
             entity.Delete();
         }
 
-        public void SetActivityStatusFinished(Guid activityId)
+        public void CheckRecord(Guid activityId)
         {
             Update update = new Update(_userConnection, "Activity")
                 .Set("StatusId", Column.Parameter(ConstCs.Activity.Status.Finished))
