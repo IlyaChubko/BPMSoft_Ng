@@ -47,10 +47,10 @@ namespace BPMSoft_NgExample.Services
 
         [OperationContract]
         [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.WrappedRequest, ResponseFormat = WebMessageFormat.Json)]
-        public void CheckRecord(Guid activityId)
+        public void CheckRecord(Guid activityId, bool isChecked)
         {
             ActivityHelper helper = new ActivityHelper(UserConnection);
-            helper.CheckRecord(activityId);
+            helper.CheckRecord(activityId, isChecked);
         }
 
         [OperationContract]

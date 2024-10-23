@@ -124,10 +124,11 @@ namespace BPMSoft_NgExample.Helpers
             entity.Delete();
         }
 
-        public void CheckRecord(Guid activityId)
+        public void CheckRecord(Guid activityId, bool isChecked)
         {
-            Update update = new Update(_userConnection, "Activity")
-                .Set("StatusId", Column.Parameter(ConstCs.Activity.Status.Finished))
+            Guid statusId = isChecked ? ConstCs.Activity.Status.Finished : ConstCs.Activity.Status.InProgress;
+			Update update = new Update(_userConnection, "Activity")
+                .Set("StatusId", Column.Parameter(statusId))
                 .Where("Id").IsEqual(Column.Parameter(activityId)) as Update;
             update.Execute();
         }
