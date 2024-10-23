@@ -7,6 +7,8 @@ using BPMSoft_NgExample.Models;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
+using System.Xml.Linq;
 
 namespace BPMSoft_NgExample.Helpers
 {
@@ -33,83 +35,59 @@ namespace BPMSoft_NgExample.Helpers
 
 		#region Methods: Public
 
-		public void AddRecord(Guid contactId, ActivityBaseData data)
-		{
-            Insert insert = (Insert)new Insert(_userConnection)
-                .Into("Activity")
-                .Set("Id", Column.Parameter(data.Id))
-                .Set("StatusId", Column.Parameter(ConstCs.Activity.Status.NotStarted))
-                .Set("AuthorId", Column.Parameter(_userConnection.CurrentUser.ContactId))
-                .Set("PriorityId", Column.Parameter(ConstCs.Activity.Priority.Medium))
-                .Set("ActivityCategoryId", Column.Parameter(ConstCs.Activity.Category.Todo))
-                .Set("Title", Column.Parameter(data.Title))
-                .Set("OwnerId", Column.Parameter(contactId));
-            insert.Execute();
+        public void AddRecord(Guid contactId, ActivityBaseData data)
+        {
+            var schema = _userConnection.EntitySchemaManager.GetInstanceByName("Activity");
+            var entity = schema.CreateEntity(_userConnection);
+            entity.SetColumnValue("Id", data.Id);
+            entity.SetColumnValue("StatusId", ConstCs.Activity.Status.NotStarted);
+            entity.SetColumnValue("AuthorId", _userConnection.CurrentUser.ContactId);
+            entity.SetColumnValue("PriorityId", ConstCs.Activity.Priority.Medium);
+            entity.SetColumnValue("ActivityCategoryId", ConstCs.Activity.Category.Todo);
+            entity.SetColumnValue("Title", data.Title);
+            entity.SetColumnValue("OwnerId", contactId);
+            entity.Save();
         }
 
         public List<ActivityBaseData> GetRecords(Guid ownerId)
         {
-            List<ActivityBaseData> activityList = new List<ActivityBaseData> { };
-            Select select = new Select(_userConnection)
-                .Column("Id")
-                .Column("Title")
-                .Column("StartDate")
-                .Column("StatusId")
-                .From("Activity")
-                .Where("OwnerId").IsEqual(Column.Parameter(ownerId)) as Select;
-            using (DBExecutor dbExecutor = _userConnection.EnsureDBConnection())
+            var esq = new EntitySchemaQuery(_userConnection.EntitySchemaManager, "Activity");
+            var idColumn = esq.AddColumn("Id");
+            var titleColumn = esq.AddColumn("Title");
+            var startDateColumn = esq.AddColumn("StartDate");
+            var statusColumn = esq.AddColumn("Status.Id");
+            esq.Filters.Add(esq.CreateFilterWithParameters(FilterComparisonType.Equal, "Owner.Id", ownerId));
+            var entities = esq.GetEntityCollection(_userConnection);
+            return entities.Select(entity => new ActivityBaseData
             {
-                using (IDataReader dataReader = select.ExecuteReader(dbExecutor))
-                {
-                    while (dataReader.Read())
-                    {
-                        activityList.Add(new ActivityBaseData
-                        {
-                            Id = dataReader.GetColumnValue<Guid>("Id"),
-                            Title = dataReader.GetColumnValue<string>("Title"),
-                            StartDate = dataReader.GetColumnValue<DateTime>("StartDate").ToString("dd.MM.yyyy"),
-                            StatusId = dataReader.GetColumnValue<Guid>("StatusId"),
-                        });
-                    }
-                }
-            }
-            return activityList;
+                Id = entity.GetTypedColumnValue<Guid>(idColumn.Name),
+                Title = entity.GetTypedColumnValue<string>(titleColumn.Name),
+                StartDate = entity.GetTypedColumnValue<DateTime>(startDateColumn.Name).ToString("dd.MM.yyyy"),
+                StatusId = entity.GetTypedColumnValue<Guid>(statusColumn.Name)
+            }).ToList();
         }
 
         public ActivityFullData GetRecord(Guid activityId)
         {
-            ActivityFullData activity = new ActivityFullData {};
-            Select select = new Select(_userConnection)
-                .Column("Activity", "Title")
-                .Column("Activity", "StartDate")
-                .Column("Activity", "DueDate")
-                .Column("Activity", "StatusId")
-                .Column("Author", "Name").As("AuthorName")
-                .Column("ActivityCategory", "Name").As("CategoryName")
-                .From("Activity")
-                .InnerJoin("Contact").As("Author").On("Activity", "AuthorId").IsEqual("Author", "Id")
-                .InnerJoin("ActivityCategory").As("ActivityCategory").On("Activity", "ActivityCategoryId").IsEqual("ActivityCategory", "Id")
-                .Where("Activity", "Id").IsEqual(Column.Parameter(activityId)) as Select;
-            using (DBExecutor dbExecutor = _userConnection.EnsureDBConnection())
+            var esq = new EntitySchemaQuery(_userConnection.EntitySchemaManager, "Activity");
+            var titleColumn = esq.AddColumn("Title");
+            var startDateColumn = esq.AddColumn("StartDate");
+            var dueDateColumn = esq.AddColumn("DueDate");
+            var statusColumn = esq.AddColumn("Status.Id");
+            var authorColumn = esq.AddColumn("Author.Name");
+            var categoryColumn = esq.AddColumn("ActivityCategory.Name");
+            esq.Filters.Add(esq.CreateFilterWithParameters(FilterComparisonType.Equal, "Id", activityId));
+            var entity = esq.GetEntityCollection(_userConnection).FirstOrDefault();
+            return entity != null ? new ActivityFullData
             {
-                using (IDataReader dataReader = select.ExecuteReader(dbExecutor))
-                {
-                    if (dataReader.Read())
-                    {
-                        activity = new ActivityFullData
-                        {
-                            Id = activityId,
-                            Title = dataReader.GetColumnValue<string>("Title"),
-                            StartDate = dataReader.GetColumnValue<DateTime>("StartDate").ToString("dd.MM.yyyy"),
-                            EndDate = dataReader.GetColumnValue<DateTime>("DueDate").ToString("dd.MM.yyyy"),
-                            StatusId = dataReader.GetColumnValue<Guid>("StatusId"),
-                            Author = dataReader.GetColumnValue<string>("AuthorName"),
-                            Category = dataReader.GetColumnValue<string>("CategoryName")
-                        };
-                    }
-                }
-            }
-            return activity;
+                Id = activityId,
+                Title = entity.GetTypedColumnValue<string>(titleColumn.Name),
+                StartDate = entity.GetTypedColumnValue<DateTime>(startDateColumn.Name).ToString("dd.MM.yyyy"),
+                EndDate = entity.GetTypedColumnValue<DateTime>(dueDateColumn.Name).ToString("dd.MM.yyyy"),
+                StatusId = entity.GetTypedColumnValue<Guid>(statusColumn.Name),
+                Author = entity.GetTypedColumnValue<string>(authorColumn.Name),
+                Category = entity.GetTypedColumnValue<string>(categoryColumn.Name)
+            } : null;
         }
 
         public void DeleteRecord(Guid activityId)
@@ -122,39 +100,30 @@ namespace BPMSoft_NgExample.Helpers
 
         public void CheckRecord(Guid activityId, bool isChecked)
         {
-            Guid statusId = isChecked ? ConstCs.Activity.Status.Finished : ConstCs.Activity.Status.InProgress;
-			Update update = new Update(_userConnection, "Activity")
-                .Set("StatusId", Column.Parameter(statusId))
-                .Where("Id").IsEqual(Column.Parameter(activityId)) as Update;
-            update.Execute();
+            var statusId = isChecked ? ConstCs.Activity.Status.Finished : ConstCs.Activity.Status.InProgress;
+            var schema = _userConnection.EntitySchemaManager.GetInstanceByName("Activity");
+            var entity = schema.CreateEntity(_userConnection);
+            if (entity.FetchFromDB(activityId))
+            {
+                entity.SetColumnValue("StatusId", statusId);
+                entity.Save();
+            }
         }
 
         public List<StatusData> GetStatuses()
         {
-            List<StatusData> list = new List<StatusData>();
-            Select select = new Select(_userConnection)
-                .Column("Id")
-                .Column("Name")
-                .Column("Finish")
-                .From("ActivityStatus") as Select;
-            using (DBExecutor dbExecutor = _userConnection.EnsureDBConnection())
+            var esq = new EntitySchemaQuery(_userConnection.EntitySchemaManager, "ActivityStatus");
+            var idColumn = esq.AddColumn("Id");
+            var nameColumn = esq.AddColumn("Name");
+            var finishColumn = esq.AddColumn("Finish");
+            var entities = esq.GetEntityCollection(_userConnection);
+            return entities.Select(entity => new StatusData
             {
-                using (IDataReader dataReader = select.ExecuteReader(dbExecutor))
-                {
-                    while (dataReader.Read())
-                    {
-                        list.Add(new StatusData
-                        {
-                            Id = dataReader.GetColumnValue<Guid>("Id"),
-                            Name = dataReader.GetColumnValue<string>("Name"),
-                            IsFinal = dataReader.GetColumnValue<bool>("Finish"),
-                        });
-                    }
-                }
-            }
-            return list;
+                Id = entity.GetTypedColumnValue<Guid>(idColumn.Name),
+                Name = entity.GetTypedColumnValue<string>(nameColumn.Name),
+                IsFinal = entity.GetTypedColumnValue<bool>(finishColumn.Name)
+            }).ToList();
         }
-
         #endregion
     }
 }
