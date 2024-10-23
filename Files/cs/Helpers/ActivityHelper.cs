@@ -42,6 +42,7 @@ namespace BPMSoft_NgExample.Helpers
 		{
             Insert insert = (Insert)new Insert(_userConnection)
                 .Into("Activity")
+                .Set("Id", Column.Parameter(data.Id))
                 .Set("StatusId", Column.Parameter(ConstCs.Activity.Status.NotStarted))
                 .Set("AuthorId", Column.Parameter(_userConnection.CurrentUser.ContactId))
                 .Set("PriorityId", Column.Parameter(ConstCs.Activity.Priority.Medium))
