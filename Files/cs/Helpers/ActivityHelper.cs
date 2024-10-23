@@ -4,18 +4,13 @@ using BPMSoft.Core.DB;
 using BPMSoft.Core.Entities;
 using BPMSoft_NgExample.Base;
 using BPMSoft_NgExample.Models;
-using Common.Logging;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Runtime.InteropServices.ComTypes;
-using System.Xml.Linq;
-using static BPMSoft_NgExample.Base.ConstCs;
-using static BPMSoft_NgExample.Base.ConstCs.Activity;
 
 namespace BPMSoft_NgExample.Helpers
 {
-    public class ActivityHelper
+	public class ActivityHelper
     {
 		#region Fields
 
