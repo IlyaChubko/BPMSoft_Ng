@@ -1,14 +1,10 @@
-﻿using BPMSoft.Common;
-using BPMSoft.Core;
-using BPMSoft.Core.DB;
+﻿using BPMSoft.Core;
 using BPMSoft.Core.Entities;
 using BPMSoft_NgExample.Base;
 using BPMSoft_NgExample.Models;
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace BPMSoft_NgExample.Helpers
 {
@@ -29,19 +25,17 @@ namespace BPMSoft_NgExample.Helpers
 
 		#endregion
 
-		#region Methods: Private
-
-		#endregion
-
 		#region Methods: Public
 
         public void AddRecord(Guid contactId, ActivityBaseData data)
         {
             var schema = _userConnection.EntitySchemaManager.GetInstanceByName("Activity");
             var entity = schema.CreateEntity(_userConnection);
+            entity.SetDefColumnValues();
             entity.SetColumnValue("Id", data.Id);
-            entity.SetColumnValue("StatusId", ConstCs.Activity.Status.NotStarted);
+            entity.SetColumnValue("StatusId", ConstCs.Activity.Status.InProgress);
             entity.SetColumnValue("AuthorId", _userConnection.CurrentUser.ContactId);
+            entity.SetColumnValue("ContactId", _userConnection.CurrentUser.ContactId);
             entity.SetColumnValue("PriorityId", ConstCs.Activity.Priority.Medium);
             entity.SetColumnValue("ActivityCategoryId", ConstCs.Activity.Category.Todo);
             entity.SetColumnValue("Title", data.Title);
@@ -88,14 +82,6 @@ namespace BPMSoft_NgExample.Helpers
                 Author = entity.GetTypedColumnValue<string>(authorColumn.Name),
                 Category = entity.GetTypedColumnValue<string>(categoryColumn.Name)
             } : null;
-        }
-
-        public void DeleteRecord(Guid activityId)
-        {
-            var esq = new EntitySchemaQuery(_userConnection.EntitySchemaManager, "Activity");
-            esq.AddAllSchemaColumns();
-            var entity = esq.GetEntity(_userConnection, activityId);
-            entity.Delete();
         }
 
         public void CheckRecord(Guid activityId, bool isChecked)

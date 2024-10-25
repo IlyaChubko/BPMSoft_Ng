@@ -1,0 +1,24 @@
+﻿{
+  "MetaData": {
+    "Schema": {
+      "ManagerName": "ClientUnitSchemaManager",
+      "UId": "fc738fbd-5046-4e5b-beb4-74ddd86d8912",
+      "A2": "UsrTodoSchema",
+      "A5": "95a45c3e-9ce0-4101-bb84-3579453c714b",
+      "B1": [],
+      "B2": [],
+      "B3": [],
+      "B6": "88293bcb-b492-d863-b424-e793a6d27791",
+      "B8": "1.5.0.902",
+      "HD1": "50e3acc0-26fc-4237-a095-849a1d534bd3",
+      "HD4": 2,
+      "HD6": "define('{0}Structure', ['{0}Resources'], function(resources) {{return {{schemaUId:'{2}',schemaName:'{3}',parentSchemaUId:'{4}',extendParent:{5},type:BPMSoft.SchemaType.EDIT_VIEW_MODEL_SCHEMA,entitySchema:'',name:'',extend:'BPMSoft.model.BaseViewModel',schema:{{leftPanel:[],rightPanel:[],actions:[],analytics:[]}},methods:{{}},controlsConfig:{{}},customBindings:{{}},bindings:{{}},schemaDifferences:function(){{\n{1}\n}}}};}});",
+      "HD5": [],
+      "HD7": [],
+      "HD8": [],
+      "HD11": [],
+      "HD20": [],
+      "HD21": []
+    }
+  }
+}

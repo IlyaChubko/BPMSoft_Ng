@@ -1,0 +1,40 @@
+name: .NET
+
+on:
+  push:
+    branches: [ "develop" ]
+  pull_request:
+    branches: [ "develop" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dotnet-version: ['3.1.x' ]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET Core SDK ${{ matrix.dotnet-version }}
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+      - name: Restore
+        run: dotnet restore
+      - name: Build
+        run: dotnet build -c Release
+      - name: Compress
+        id: generate-name
+        run: | 
+          dotnet tool update -g clio --version 3.0.1.21
+          echo "PKG_VERSION=$(clio get-pkg-version .)" >> $GITHUB_ENV
+          clio compress . -d BPMSoft_NgExample.gz
+          #echo "::set-output name=artifact::${{ github.event.repository.name }}.${{ github.ref_name }}.${{ github.run_id }}.zip"
+      - name: Save package
+        uses: actions/upload-artifact@v3
+        with:
+          name: BPMSoft_NgExample${{ env.PKG_VERSION }}
+          path: BPMSoft_NgExample.gz
+          
+      

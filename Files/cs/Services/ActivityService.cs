@@ -39,14 +39,6 @@ namespace BPMSoft_NgExample.Services
 
         [OperationContract]
         [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.WrappedRequest, ResponseFormat = WebMessageFormat.Json)]
-        public void DeleteRecord(Guid activityId)
-        {
-            ActivityHelper helper = new ActivityHelper(UserConnection);
-            helper.DeleteRecord(activityId);
-        }
-
-        [OperationContract]
-        [WebInvoke(Method = "POST", RequestFormat = WebMessageFormat.Json, BodyStyle = WebMessageBodyStyle.WrappedRequest, ResponseFormat = WebMessageFormat.Json)]
         public void CheckRecord(Guid activityId, bool isChecked)
         {
             ActivityHelper helper = new ActivityHelper(UserConnection);
